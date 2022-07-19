@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BinaryNumberContentEditor</title>
+    <!-- Since GitHub Raw files use text/plain as MIME type the script cannot be executed when linking directly, instead routed over jsdelivr-->
+    <script src='http://localhost:8080/node_modules/seamless/build/seamless.child.min.js'></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+
+    <style>
+        .input-answer {
+            margin-bottom: 1em;
+        }
+
+    </style>
+</head>
+<body>
+<script type="text/javascript">
+
+    // Connect to the parent page.
+    var parent = window.seamless.connect({
+        url: window.location.url,
+        allowStyleInjection: true,
+    });
+
+
+</script>
+<div>
+    Upload Audio File: <input id="input_audio_file" type="file" accept="audio/*">
+    <br><br>
+    Enter Question:
+    <input id="input_text_question" type="text">
+    <br><br>
+
+    <select class="selectpicker btn btn-default" id="select" aria-label="Select Question Type Dropdown">
+        <option selected value="mc">Multiple Choice</option>
+        <option value="sc">Single Choice</option>
+    </select>
+
+    <br><br>
+
+    <p>
+        Enter Answers:
+    </p>
+
+    <!-- MULTIPLE CHOICE -->
+    <div id="div_answers_mc" style="display: block">
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" class="input-cb" name="optcorrect" value="">
+                <input class="input-answer input-answer-mc" name="opttext" type="text">
+            </label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" class="input-cb" name="optcorrect" value="">
+                <input class="input-answer input-answer-mc" name="opttext" type="text">
+            </label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" class="input-cb" name="optcorrect" value="">
+                <input class="input-answer input-answer-mc" name="opttext" type="text">
+            </label>
+        </div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" class="input-cb" name="optcorrect" value="">
+                <input class="input-answer input-answer-mc" name="opttext" type="text">
+            </label>
+        </div>
+    </div>
+
+
+    <!-- SINGLE CHOICE -->
+    <div id="div_answers_sc" style="display: none">
+        <div class="radio">
+            <label>
+                <input type="radio" class="input-r" name="optcorrect" checked>
+                <input class="input-answer input-answer-sc" name="opttext" id="input_text_answer5" type="text">
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio" class="input-r" name="optcorrect" checked>
+                <input class="input-answer input-answer-sc" name="opttext" id="input_text_answer6" type="text">
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio" class="input-r" name="optcorrect" checked>
+                <input class="input-answer input-answer-sc" name="opttext" id="input_text_answer7" type="text">
+            </label>
+        </div>
+        <div class="radio">
+            <label>
+                <input type="radio" class="input-r" name="optcorrect" checked>
+                <input class="input-answer input-answer-sc" name="opttext" id="input_text_answer8" type="text">
+            </label>
+        </div>
+
+
+    </div>
+
+    <button class="btn btn-primary" type="button" onclick="sendToParent(event)">Send to Toolkit</button>
+
+
+</div>
+
+<script type="application/javascript">
+
+    $(".selectpicker").on("change",
+        function (e, clickedIndex, newValue, oldValue) {
+            if (this.value === "sc") {
+                divMultipleChoice.style.display = "none";
+                divSingleChoice.style.display = "block";
+            } else {
+                divMultipleChoice.style.display = "block";
+                divSingleChoice.style.display = "none";
+            }
+        });
+
+    function dataGetter() {
+        const answerMap = new Map();
+        const classType = divMultipleChoice.style.display === 'none' ? '.input-r' : '.input-cb'
+        $(classType).each(function () {
+            let correct = $(this).is(':checked');
+            let answer = $(this).next().val();
+            console.log(correct);
+            console.log(answer);
+            if (answer.trim()) {
+                answerMap.set(answer, correct);
+            }
+        });
+
+
+        console.log(answerMap);
+        const question = document.getElementById("input_text_question").value;
+
+
+        return {
+            // return data object
+            type: 'toViewer',
+            answers: Object.fromEntries(answerMap),
+            // preview metadata
+            title: question,
+            imageUrl: ""
+        }
+    }
+
+    // Send a message
+    window.sendToParent = function (event) {
+        event.preventDefault();
+        var result = dataGetter()
+        parent.send(result);
+    };
+
+    if (typeof window.data !== 'undefined' && typeof window.data.number == 'number') {
+        document.getElementById('numberInput').value = window.data.number;
+    }
+
+    var divMultipleChoice = document.getElementById('div_answers_mc');
+    var divSingleChoice = document.getElementById('div_answers_sc');
+
+</script>
+</body>
+</html>
