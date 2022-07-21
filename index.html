@@ -5,8 +5,9 @@
     <title>AudioContentEditor</title>
     <!-- Since GitHub Raw files use text/plain as MIME type the script cannot be executed when linking directly, instead routed over jsdelivr-->
     <script src='http://localhost:8080/node_modules/seamless/build/seamless.child.min.js'></script>
-   <!-- &lt;!&ndash; Latest compiled and minified CSS &ndash;&gt;
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+     <!-- Latest compiled and minified CSS -->
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 
     <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -14,12 +15,10 @@
     <!-- Latest compiled JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
-
     <style>
         .input-answer {
             margin-bottom: 1em;
         }
-
     </style>
 </head>
 <body>
@@ -34,9 +33,10 @@
 
 </script>
 <div>
-    Upload Audio File: <input id="input_audio_file" type="file" accept="audio/*" onchange="readFileAsUrl(this.files[0])">
+    <label for="input_audio_file">Upload Audio File:</label>
+    <input id="input_audio_file" type="file" accept="audio/*" onchange="readFileAsUrl(this.files[0])">
     <br><br>
-    Enter Question:
+    <label for="input_text_question">Enter Question:</label>
     <input id="input_text_question" type="text">
     <br><br>
 
@@ -47,34 +47,18 @@
 
     <br><br>
 
-    <p>
+    <p tabindex="0">
         Enter Answers:
+        <span class="material-icons" role="contentinfo" title="Press enter in a the text field to add another answer" aria-label="Press enter in a the text field to add another answer">info</span>
     </p>
 
-    <!-- MULTIPLE CHOICE -->
+    <!-- MULTIPLE CHOICE todo dynamisch generieren, was wenn leeres dings ausgewählt-->
     <div id="div_answers_mc" style="display: block">
         <div class="checkbox">
             <label>
                 <input type="checkbox" class="input-cb" name="optcorrect" value="">
-                <input class="input-answer input-answer-mc" name="opttext" type="text">
-            </label>
-        </div>
-        <div class="checkbox">
-            <label>
-                <input type="checkbox" class="input-cb" name="optcorrect" value="">
-                <input class="input-answer input-answer-mc" name="opttext" type="text">
-            </label>
-        </div>
-        <div class="checkbox">
-            <label>
-                <input type="checkbox" class="input-cb" name="optcorrect" value="">
-                <input class="input-answer input-answer-mc" name="opttext" type="text">
-            </label>
-        </div>
-        <div class="checkbox">
-            <label>
-                <input type="checkbox" class="input-cb" name="optcorrect" value="">
-                <input class="input-answer input-answer-mc" name="opttext" type="text">
+                <input class="input-answer input-answer-mc" name="opttext" type="text" id="mc0"
+                       onchange="addOption(this.id)">
             </label>
         </div>
     </div>
@@ -85,37 +69,25 @@
         <div class="radio">
             <label>
                 <input type="radio" class="input-r" name="optcorrect" checked>
-                <input class="input-answer input-answer-sc" name="opttext" id="input_text_answer5" type="text">
+                <input class="input-answer input-answer-sc" name="opttext" id="sc0" type="text" onchange="addOption(this.id)">
             </label>
         </div>
-        <div class="radio">
-            <label>
-                <input type="radio" class="input-r" name="optcorrect" checked>
-                <input class="input-answer input-answer-sc" name="opttext" id="input_text_answer6" type="text">
-            </label>
-        </div>
-        <div class="radio">
-            <label>
-                <input type="radio" class="input-r" name="optcorrect" checked>
-                <input class="input-answer input-answer-sc" name="opttext" id="input_text_answer7" type="text">
-            </label>
-        </div>
-        <div class="radio">
-            <label>
-                <input type="radio" class="input-r" name="optcorrect" checked>
-                <input class="input-answer input-answer-sc" name="opttext" id="input_text_answer8" type="text">
-            </label>
-        </div>
-
-
     </div>
 
-    <button class="btn btn-primary" type="button" onclick="sendToParent(event)">Send to Toolkit</button>
-
+    <button class="btn btn-primary" type="button" onclick="sendToParent(event)">Send to Viewer</button>
 
 </div>
 
 <script type="application/javascript">
+
+    function addOption(inputText) {
+        if (createdAnswersIds.find(element => element === inputText) === undefined) { // if not already in the list
+            createdAnswersIds.push(inputText);
+            isMultipleChoice() && divMultipleChoice.children.length < 5 ? createMultipleChoiceElement()
+                : divSingleChoice.children.length < 5 ? createSingleChoiceElement() : null;
+        }
+
+    }
 
     $(".selectpicker").on("change",
         function (e, clickedIndex, newValue, oldValue) {
@@ -128,9 +100,46 @@
             }
         });
 
+    function createMultipleChoiceElement() {
+        let divMC = document.createElement('div');
+        let labelMC = document.createElement('label');
+        let checkbox = document.createElement('input');
+        checkbox.type = "checkbox";
+        checkbox.classList.add(checkboxClassName);
+        checkbox.name = "optcorrect";
+        let inputText = document.createElement('input');
+        inputText.type = "text";
+        inputText.classList.add(inputAnswerClassname);
+        inputText.id = 'mc' + createdAnswersIds.length.toString();
+        inputText.onchange = () => addOption(inputText.id);
+
+        labelMC.append(checkbox, inputText); // todo geht das?
+        divMC.appendChild(labelMC);
+        divMultipleChoice.appendChild(divMC);
+    }
+
+    function createSingleChoiceElement() {
+        let divSC = document.createElement('div');
+        let labelSC = document.createElement('label');
+        let radioBtn = document.createElement('input');
+        radioBtn.type = "radio";
+        radioBtn.classList.add(radioClassName);
+        radioBtn.name = "optcorrect";
+        let inputText = document.createElement('input');
+        inputText.type = "text";
+        inputText.classList.add(inputAnswerClassname);
+        inputText.id = 'sc' + createdAnswersIds.length.toString();
+        inputText.onchange = () => addOption(inputText.id);
+
+
+        labelSC.append(radioBtn, inputText);
+        divSC.appendChild(labelSC);
+        divSingleChoice.appendChild(divSC);
+    }
+
     function dataGetter() {
         const options = [];
-        const classType = isMultipleChoice() ? '.input-cb' : '.input-r'
+        const classType = isMultipleChoice() ? '.' + checkboxClassName : '.' + radioClassName;
 
         $(classType).each(function () {
             let correct = $(this).is(':checked');
@@ -157,7 +166,7 @@
         }
     }
 
-    function isMultipleChoice(){
+    function isMultipleChoice() {
         return divMultipleChoice.style.display !== "none";
     }
 
@@ -178,12 +187,16 @@
         parent.send(result);
     };
 
-    if (typeof window.data !== 'undefined' && typeof window.data.number == 'number') {
+    if (typeof window.data !== 'undefined' && typeof window.data.number == 'number') { // todo wos is er? weg oder?
         document.getElementById('numberInput').value = window.data.number;
     }
     let fileUrl;
     let divMultipleChoice = document.getElementById('div_answers_mc');
     let divSingleChoice = document.getElementById('div_answers_sc');
+    const createdAnswersIds = [];
+    const checkboxClassName = "input-cb";
+    const radioClassName = "input-r";
+    const inputAnswerClassname = "input-answer";
 
 </script>
 </body>
