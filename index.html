@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>BinaryNumberContentEditor</title>
+    <title>AudioContentEditor</title>
     <!-- Since GitHub Raw files use text/plain as MIME type the script cannot be executed when linking directly, instead routed over jsdelivr-->
     <script src='http://localhost:8080/node_modules/seamless/build/seamless.child.min.js'></script>
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+   <!-- &lt;!&ndash; Latest compiled and minified CSS &ndash;&gt;
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">-->
 
     <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -34,7 +34,7 @@
 
 </script>
 <div>
-    Upload Audio File: <input id="input_audio_file" type="file" accept="audio/*">
+    Upload Audio File: <input id="input_audio_file" type="file" accept="audio/*" onchange="readFileAsUrl(this.files[0])">
     <br><br>
     Enter Question:
     <input id="input_text_question" type="text">
@@ -129,31 +129,46 @@
         });
 
     function dataGetter() {
-        const answerMap = new Map();
-        const classType = divMultipleChoice.style.display === 'none' ? '.input-r' : '.input-cb'
+        const options = [];
+        const classType = isMultipleChoice() ? '.input-cb' : '.input-r'
+
         $(classType).each(function () {
             let correct = $(this).is(':checked');
             let answer = $(this).next().val();
-            console.log(correct);
-            console.log(answer);
+            let index = options.length
             if (answer.trim()) {
-                answerMap.set(answer, correct);
+                options.push({
+                    "index": index,
+                    "text": answer,
+                    "correct": correct
+                });
             }
         });
 
-
-        console.log(answerMap);
         const question = document.getElementById("input_text_question").value;
-
 
         return {
             // return data object
             type: 'toViewer',
-            answers: Object.fromEntries(answerMap),
-            // preview metadata
+            answers: options,
+            isMultipleChoice: isMultipleChoice(),
             title: question,
-            imageUrl: ""
+            audioUrl: fileUrl
         }
+    }
+
+    function isMultipleChoice(){
+        return divMultipleChoice.style.display !== "none";
+    }
+
+    function readFileAsUrl(file) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = _ => {
+            fileUrl = reader.result;
+        };
+
     }
 
     // Send a message
@@ -166,9 +181,9 @@
     if (typeof window.data !== 'undefined' && typeof window.data.number == 'number') {
         document.getElementById('numberInput').value = window.data.number;
     }
-
-    var divMultipleChoice = document.getElementById('div_answers_mc');
-    var divSingleChoice = document.getElementById('div_answers_sc');
+    let fileUrl;
+    let divMultipleChoice = document.getElementById('div_answers_mc');
+    let divSingleChoice = document.getElementById('div_answers_sc');
 
 </script>
 </body>
