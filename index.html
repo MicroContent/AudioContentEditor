@@ -52,7 +52,7 @@
         <span class="material-icons" role="contentinfo" title="Press enter in a the text field to add another answer" aria-label="Press enter in a the text field to add another answer">info</span>
     </p>
 
-    <!-- MULTIPLE CHOICE todo dynamisch generieren, was wenn leeres dings ausgewählt-->
+    <!-- MULTIPLE CHOICE -->
     <div id="div_answers_mc" style="display: block">
         <div class="checkbox">
             <label>
@@ -113,7 +113,7 @@
         inputText.id = 'mc' + createdAnswersIds.length.toString();
         inputText.onchange = () => addOption(inputText.id);
 
-        labelMC.append(checkbox, inputText); // todo geht das?
+        labelMC.append(checkbox, inputText);
         divMC.appendChild(labelMC);
         divMultipleChoice.appendChild(divMC);
     }
@@ -171,12 +171,13 @@
     }
 
     function readFileAsUrl(file) {
-        const reader = new FileReader();
+        /*const reader = new FileReader();
         reader.readAsDataURL(file);
 
         reader.onload = _ => {
             fileUrl = reader.result;
-        };
+        };*/
+        fileUrl = JSON.stringify(file);
 
     }
 
@@ -187,9 +188,7 @@
         parent.send(result);
     };
 
-    if (typeof window.data !== 'undefined' && typeof window.data.number == 'number') { // todo wos is er? weg oder?
-        document.getElementById('numberInput').value = window.data.number;
-    }
+   
     let fileUrl;
     let divMultipleChoice = document.getElementById('div_answers_mc');
     let divSingleChoice = document.getElementById('div_answers_sc');
