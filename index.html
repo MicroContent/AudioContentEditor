@@ -18,6 +18,8 @@
     <style>
         .input-answer {
             margin-bottom: 1em;
+            margin-left: 1em;
+            font-weight: normal;
         }
     </style>
 </head>
@@ -29,6 +31,11 @@
         url: window.location.url,
         allowStyleInjection: true,
     });
+    function updateLayout() {
+        parent.send({
+            type: 'updateLayout'
+        });
+    }
 
 
 </script>
@@ -186,9 +193,10 @@
         event.preventDefault();
         var result = dataGetter()
         parent.send(result);
+        updateLayout();
     };
 
-   
+
     let fileUrl;
     let divMultipleChoice = document.getElementById('div_answers_mc');
     let divSingleChoice = document.getElementById('div_answers_sc');
