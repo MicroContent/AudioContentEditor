@@ -56,24 +56,22 @@
      */
     function init() {
         if (window.data !== undefined) {
-            // todo set file so wie bei image? file laden mit option löschen und neu hochladen
 
             // set audio file
             if (window.data.audioUrl !== undefined) {
                 toggleDivAudioVisibility(true);
                document.getElementById("audio_player").src = window.data.audioUrl;
-                // todo add x to delete audio
             }
 
-
             // set question
-            document.getElementById("input_text_question").value = window.data.title; // todo null check
+            if(window.data.title !== undefined) {
+                document.getElementById("input_text_question").value = window.data.title;
+            }
 
             // set dropdown
             if (!window.data.isMultipleChoice) {
                 $('#select').val("sc");
                 toggleDivAnswerVisibility("sc");
-
             }
 
             // set answers
@@ -90,8 +88,6 @@
             createMultipleChoiceElement();
             createSingleChoiceElement();
         }
-
-
     }
 
 
@@ -126,23 +122,13 @@
 
     <!-- MULTIPLE CHOICE -->
     <div id="div_answers_mc" style="display: block">
-       <!-- <div class="checkbox">
-            <label>
-                <input type="checkbox" class="input-c" name="optcorrect" checked>
-                <input class="input-answer input-answer-mc" name="opttext" id="mc0" type="text" onchange="addOption(this.id)">
-            </label>
-        </div>-->
+
     </div>
 
 
     <!-- SINGLE CHOICE -->
     <div id="div_answers_sc" style="display: none">
-        <!--<div class="radio">
-            <label>
-                <input type="radio" class="input-r" name="optcorrect" checked>
-                <input class="input-answer input-answer-sc" name="opttext" id="sc0" type="text" onchange="addOption(this.id)">
-            </label>
-        </div>-->
+
     </div>
 
     <button class="btn btn-primary" type="button" onclick="sendToParent(event)">Send to Viewer</button>
@@ -258,14 +244,7 @@
     }
 
     function readFileAsUrl(file) {
-        /*const reader = new FileReader();
-        reader.readAsDataURL(file);
-
-        reader.onload = _ => {
-            fileUrl = reader.result;
-        };*/
         fileUrl = JSON.stringify(file);
-
     }
 
     // Send a message
