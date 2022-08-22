@@ -55,7 +55,7 @@
      * If edit mode load data from window into editor
      */
     function init() {
-        if (window.data !== undefined && window.data !== null) {
+        if (window.data !== undefined && window.data !== null) { // in edit mode
 
             // set audio file
             if (window.data.audioUrl !== undefined) {
@@ -80,13 +80,13 @@
                 divAnswers.innerHTML = "";
                 answerArray = window.data.answers;
                 answerArray.forEach(((option) => {
-                    window.data.isMultipleChoice? createMultipleChoiceElement(option.text): createSingleChoiceElement(option.text);
+                    createChoiceElement(window.data.isMultipleChoice, option)
                 }));
             }
 
-        } else {
-            createMultipleChoiceElement();
-            createSingleChoiceElement();
+        } else { // initialize new card with empty inputs
+            createChoiceElement(isMultipleChoice());
+            createChoiceElement(!isMultipleChoice());
         }
     }
 
@@ -131,21 +131,14 @@
 
     </div>
 
+    <button class="btn" type="button" onclick="createChoiceElement(isMultipleChoice())">Add another answer</button>
+    <br><br>
+
     <button class="btn btn-primary" type="button" onclick="sendToParent(event)">Send to Viewer</button>
 
 </div>
 
 <script type="application/javascript">
-
-
-    function addOption(inputText) {
-        if (createdAnswersIds.find(element => element === inputText) === undefined) { // if not already in the list
-            createdAnswersIds.push(inputText);
-            isMultipleChoice() && divMultipleChoice.children.length < 5 ? createMultipleChoiceElement()
-                : divSingleChoice.children.length < 5 ? createSingleChoiceElement() : null;
-        }
-
-    }
 
     function toggleDivAnswerVisibility(value) {
         if (value === "sc") {
@@ -167,47 +160,41 @@
         }
     }
 
-    function createMultipleChoiceElement(textData) {
-        let divMC = document.createElement('div');
-        let labelMC = document.createElement('label');
-        let checkbox = document.createElement('input');
-        checkbox.type = "checkbox";
-        checkbox.classList.add(checkboxClassName);
-        checkbox.name = "optcorrect";
+    function createChoiceElement(isMultipleChoice, option) {
+        const id = isMultipleChoice ? 'mc' + createdAnswersIds.length.toString() : 'sc' + createdAnswersIds.length.toString();
+        if (createdAnswersIds.find(element => element === id) !== undefined || createdAnswersIds.length >= 5) { // if already in list or list contains 5 answers
+            return;
+        }
+        let div = document.createElement('div');
+        let label = document.createElement('label');
         let inputText = document.createElement('input');
         inputText.type = "text";
         inputText.classList.add(inputAnswerClassname);
-        inputText.id = 'mc' + createdAnswersIds.length.toString();
-        inputText.onchange = () => addOption(inputText.id);
-        if (textData !== undefined) {
-            inputText.value = textData;
+        inputText.id = id;
+        let choiceElement;
+
+        if (isMultipleChoice) {
+            choiceElement = document.createElement('input');
+            choiceElement.type = "checkbox";
+            choiceElement.classList.add(checkboxClassName);
+            choiceElement.name = "optcorrect";
+            label.appendChild(choiceElement);
+        } else {
+            choiceElement = document.createElement('input');
+            choiceElement.type = "radio";
+            choiceElement.classList.add(radioClassName);
+            choiceElement.name = "optcorrect";
+            label.appendChild(choiceElement);
         }
 
-        labelMC.append(checkbox, inputText);
-        divMC.appendChild(labelMC);
-        divMultipleChoice.appendChild(divMC);
-    }
-
-    function createSingleChoiceElement(textData) {
-        let divSC = document.createElement('div');
-        let labelSC = document.createElement('label');
-        let radioBtn = document.createElement('input');
-        radioBtn.type = "radio";
-        radioBtn.classList.add(radioClassName);
-        radioBtn.name = "optcorrect";
-        let inputText = document.createElement('input');
-        inputText.type = "text";
-        inputText.classList.add(inputAnswerClassname);
-        inputText.id = 'sc' + createdAnswersIds.length.toString();
-        inputText.onchange = () => addOption(inputText.id);
-        if (textData !== undefined) {
-            inputText.value = textData;
+        if (option !== undefined) {
+            inputText.value = option.text;
+            choiceElement.checked = option.correct;
         }
 
-
-        labelSC.append(radioBtn, inputText);
-        divSC.appendChild(labelSC);
-        divSingleChoice.appendChild(divSC);
+        label.appendChild(inputText);
+        div.appendChild(label);
+        isMultipleChoice ? divMultipleChoice.appendChild(div) : divSingleChoice.appendChild(div);
     }
 
     function dataGetter() {
