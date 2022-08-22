@@ -55,7 +55,7 @@
      * If edit mode load data from window into editor
      */
     function init() {
-        if (window.data !== undefined) {
+        if (window.data !== undefined && window.data !== null) {
 
             // set audio file
             if (window.data.audioUrl !== undefined) {
@@ -244,7 +244,12 @@
     }
 
     function readFileAsUrl(file) {
-        fileUrl = JSON.stringify(file);
+        const fileReader = new FileReader();
+        fileReader.readAsDataURL(file);
+        fileReader.onload = _ => {
+            fileUrl = fileReader.result;
+        }
+
     }
 
     // Send a message
