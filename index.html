@@ -58,9 +58,9 @@
         if (window.data !== undefined && window.data !== null) { // in edit mode
 
             // set audio file
-            if (window.data.audioUrl !== undefined) {
+            if (window.data.mediaUrlArray !== undefined) {
                 toggleDivAudioVisibility(true);
-               document.getElementById("audio_player").src = window.data.audioUrl;
+               document.getElementById("audio_player").src = window.data.mediaUrlArray;
             }
 
             // set question
@@ -217,7 +217,7 @@
             answers: options,
             isMultipleChoice: isMultipleChoice(),
             title: question,
-            audioUrl: fileUrl
+            mediaUrlArray: [fileUrl]
         }
     }
 
