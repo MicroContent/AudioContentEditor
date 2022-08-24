@@ -33,17 +33,24 @@
         allowStyleInjection: true,
     });
 
-
+    // handling received messages
     parent.receive(function (data) {
-        console.log("in receive");
        switch (data.type) {
            case 'setContent':
                // parent for varying type of input sends data as special object; data.main[0] is the array of arrays with your message inside
                window.data = data.main[0];
-               init();
+               setContent();
                break;
        }
     });
+
+    // send form data to parent
+    window.sendToParent = function (event) {
+        event.preventDefault();
+        var result = dataGetter()
+        parent.send(result);
+        updateLayout();
+    };
 
     function updateLayout() {
         parent.send({
@@ -51,42 +58,46 @@
         });
     }
 
+
     /**
      * If edit mode load data from window into editor
      */
     function init() {
         if (window.data !== undefined && window.data !== null) { // in edit mode
-
-            // set audio file
-            if (window.data.mediaUrlArray !== undefined) {
-                toggleDivAudioVisibility(true);
-               document.getElementById("audio_player").src = window.data.mediaUrlArray;
-            }
-
-            // set question
-            if(window.data.title !== undefined) {
-                document.getElementById("input_text_question").value = window.data.title;
-            }
-
-            // set dropdown
-            if (!window.data.isMultipleChoice) {
-                $('#select').val("sc");
-                toggleDivAnswerVisibility("sc");
-            }
-
-            // set answers
-            if(window.data.answers !== undefined){
-                var divAnswers = window.data.isMultipleChoice? document.getElementById("div_answers_mc") : document.getElementById("div_answers_sc");
-                divAnswers.innerHTML = "";
-                answerArray = window.data.answers;
-                answerArray.forEach(((option) => {
-                    createChoiceElement(window.data.isMultipleChoice, option)
-                }));
-            }
+            setContent();
 
         } else { // initialize new card with empty inputs
             createChoiceElement(isMultipleChoice());
             createChoiceElement(!isMultipleChoice());
+        }
+    }
+
+    function setContent(){
+        // set audio file
+        if (window.data.mediaUrlArray !== undefined) {
+            toggleDivAudioVisibility(true);
+            document.getElementById("audio_player").src = window.data.mediaUrlArray;
+        }
+
+        // set question
+        if(window.data.title !== undefined) {
+            document.getElementById("input_text_question").value = window.data.title;
+        }
+
+        // set dropdown
+        if (!window.data.isMultipleChoice) {
+            $('#select').val("sc");
+            toggleDivAnswerVisibility("sc");
+        }
+
+        // set answers
+        if(window.data.answers !== undefined){
+            var divAnswers = window.data.isMultipleChoice? document.getElementById("div_answers_mc") : document.getElementById("div_answers_sc");
+            divAnswers.innerHTML = "";
+            answerArray = window.data.answers;
+            answerArray.forEach(((option) => {
+                createChoiceElement(window.data.isMultipleChoice, option)
+            }));
         }
     }
 
@@ -155,6 +166,14 @@
         }
     }
 
+    /**
+     * Dynamically creates an HTML choice element consisting of a text input field and either a checkbox or radio button
+     * @param isMultipleChoice  (required) boolean indicating which type of input should be created.
+     *                          True creates a checkbox, false a radio button.
+     * @param option    (optional) data object in the structure of {index: int, text: string, correct: bool}.
+     *                  If the card is being edited (as opposed to created), text and checked attributes are initialized
+     *                  with this data.
+     */
     function createChoiceElement(isMultipleChoice, option) {
         const id = isMultipleChoice ? 'mc' + createdAnswersIds.length.toString() : 'sc' + createdAnswersIds.length.toString();
         if (createdAnswersIds.find(element => element === id) !== undefined || createdAnswersIds.length >= 5) { // if already in list or list contains 5 answers
@@ -192,6 +211,10 @@
         isMultipleChoice ? divMultipleChoice.appendChild(div) : divSingleChoice.appendChild(div);
     }
 
+    /**
+     * Converts the current state of the editor into a processable form for the Socialmicrolearning Platform.
+     * @return {{answers: *[], type: string, title: *, mediaUrlArray: *[], isMultipleChoice: boolean}}
+     */
     function dataGetter() {
         const options = [];
         const classType = isMultipleChoice() ? '.' + checkboxClassName : '.' + radioClassName;
@@ -231,16 +254,9 @@
         fileReader.onload = _ => {
             fileUrl = fileReader.result;
         }
-
     }
 
-    // Send a message
-    window.sendToParent = function (event) {
-        event.preventDefault();
-        var result = dataGetter()
-        parent.send(result);
-        updateLayout();
-    };
+
 
 
     let fileUrl;
