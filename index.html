@@ -74,9 +74,10 @@
 
     function setContent(){
         // set audio file
-        if (window.data.mediaUrlArray !== undefined) {
+        if (window.data.mediaUrlArray !== undefined && window.data.mediaUrlArray[0] !== null) {
             toggleDivAudioVisibility(true);
-            document.getElementById("audio_player").src = window.data.mediaUrlArray;
+            fileUrl = window.data.mediaUrlArray[0];
+            document.getElementById("audio_player").src = window.data.mediaUrlArray[0];
         }
 
         // set question
