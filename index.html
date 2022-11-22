@@ -41,12 +41,18 @@
                window.data = data.main[0];
                setContent();
                break;
+           case 'getContent':
+               sendToParent();
+               break;
        }
     });
 
     // send form data to parent
     window.sendToParent = function (event) {
-        event.preventDefault();
+        if(event){
+            event.preventDefault();
+        }
+
         var result = dataGetter()
         parent.send(result);
         updateLayout();
@@ -140,8 +146,6 @@
 
     <button class="btn" type="button" onclick="createChoiceElement(isMultipleChoice())">Add another answer</button>
     <br><br>
-
-    <button class="btn btn-primary" type="button" onclick="sendToParent(event)">Send to Viewer</button>
 
 </div>
 
@@ -237,7 +241,7 @@
 
         return {
             // return data object
-            type: 'toViewer',
+            type: 'updateData', // todo updateData?
             answers: options,
             isMultipleChoice: isMultipleChoice(),
             title: question,
